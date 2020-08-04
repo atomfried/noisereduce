@@ -209,13 +209,21 @@ def reduce_noise(
         pbar = None
 
     update_pbar(pbar, "STFT on noise")
-    # STFT over noise
-    noise_stft = _stft(
-        noise_clip, n_fft, hop_length, win_length, use_tensorflow=use_tensorflow
-    )
+
+    if not np.iterable(noise_clip[0]):
+        noise_clip = [noise_clip]
+
+    noise_stft = None
+    for nc in noise_clip:
+        tmp = _stft( nc, n_fft, hop_length, win_length, use_tensorflow=use_tensorflow)
+        noise_stft = tmp if noise_stft is None else np.maximum(noise_stft, tmp) 
+
+    return doit(audio_clip, noise_stft, n_grad_freq, n_grad_time, n_fft, win_length, hop_length, n_std_thresh, prop_decrease, pad_clipping, use_tensorflow, verbose, pbar)
+
+def doit(audio_clip, noise_stft, n_grad_freq, n_grad_time, n_fft, win_length, hop_length, n_std_thresh, prop_decrease, pad_clipping, use_tensorflow, verbose, pbar):
     noise_stft_db = _amp_to_db(np.abs(noise_stft))  # convert to dB
     # Calculate statistics over noise
-    update_pbar(pbar, "STFT on signal")
+    update_pbar(pbar, "STFT on noise")
     mean_freq_noise = np.mean(noise_stft_db, axis=1)
     std_freq_noise = np.std(noise_stft_db, axis=1)
     noise_thresh = mean_freq_noise + std_freq_noise * n_std_thresh
