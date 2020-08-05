@@ -210,13 +210,13 @@ def reduce_noise(
 
     update_pbar(pbar, "STFT on noise")
 
-    if not np.iterable(noise_clip[0]):
+    if len(noise_clip) > 0 and not np.iterable(noise_clip[0]):
         noise_clip = [noise_clip]
 
     noise_stft = None
     for nc in noise_clip:
         tmp = _stft( nc, n_fft, hop_length, win_length, use_tensorflow=use_tensorflow)
-        noise_stft = tmp if noise_stft is None else np.maximum(noise_stft, tmp) 
+        noise_stft = tmp if noise_stft is None else np.maximum(noise_stft, tmp)
 
     return doit(audio_clip, noise_stft, n_grad_freq, n_grad_time, n_fft, win_length, hop_length, n_std_thresh, prop_decrease, pad_clipping, use_tensorflow, verbose, pbar)
 
