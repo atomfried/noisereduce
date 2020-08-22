@@ -210,7 +210,7 @@ def reduce_noise(
 
     update_pbar(pbar, "STFT on noise")
 
-    if len(noise_clip) > 0 and not np.iterable(noise_clip[0]):
+    if not np.iterable(noise_clip[0]):
         noise_clip = [noise_clip]
 
     noise_stft = None
